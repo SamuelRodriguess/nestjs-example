@@ -1,0 +1,21 @@
+@baseUrl = http://localhost:3000
+
+@userNameForTesting = Luiz
+@userEmailForTesting = luiz@email.com
+@userPasswordForTesting = 123456
+@userNewPasswordForTesting = 123456
+
+
+
+# USER ########################################################################
+
+### Create user
+# @name createUser
+GET  {{baseUrl}}/user/1
+Content-Type: application/json
+
+{
+    "name": "{{userNameForTesting}}",
+    "email": "{{userEmailForTesting}}",
+    "password": "{{userPasswordForTesting}}"
+}
