@@ -11,7 +11,7 @@
 
 ### Create user
 # @name createUser
-GET  {{baseUrl}}/user/1
+GET  {{baseUrl}}/user/
 Content-Type: application/json
 
 {
