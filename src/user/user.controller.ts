@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { JwtAuthGuard } from 'src/auth/JwtAuthGuard/JwtAuthGuard';
+import { AuthenticatedRequest } from 'src/auth/types/Request';
 
 @Controller('user')
 export class UserController {
@@ -22,15 +26,11 @@ export class UserController {
     return new UserResponseDto(user);
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    console.log('Finding user with ID:', id);
-    return this.userService.findOne(+id);
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async findOne(@Req() req: AuthenticatedRequest) {
+    const user = await this.userService.findUserOrFail({ id: req.user.id });
+    return new UserResponseDto(user);
   }
 
   @Patch(':id')

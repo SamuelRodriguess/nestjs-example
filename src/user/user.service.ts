@@ -1,10 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
 import { HashingService } from 'src/common/hashing/ hashing.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class UserService {
@@ -14,8 +21,30 @@ export class UserService {
     private readonly hashingService: HashingService,
   ) {}
 
+  async failIfEmailExists(email: string) {
+    const exitsEmail = await this.userRepository.existsBy({ email });
+
+    if (exitsEmail) {
+      throw new ConflictException('E-mail já existe');
+    }
+  }
+
+  async findUserOrFail(userData: Partial<User>) {
+    const hasUserData = await this.userRepository.findOneBy(userData);
+
+    if (!hasUserData) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    return hasUserData;
+  }
+
   findByEmail(email: string) {
     return this.userRepository.findOneBy({ email });
+  }
+
+  findById(id: string) {
+    return this.userRepository.findOneBy({ id });
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -23,13 +52,11 @@ export class UserService {
       createUserDto.password,
     );
 
-    const newUser = {
+    const newUser: CreateUserDto = {
       name: createUserDto.name,
       email: createUserDto.email,
       password: hashedPassword,
     };
-
-    console.log('newUser:', newUser);
 
     const created = await this.userRepository.save(newUser);
     return created;
