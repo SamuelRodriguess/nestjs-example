@@ -49,7 +49,8 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         };
       },
     }),
-    UploadModule,
+    /*     UploadModule,
+     */
   ],
   controllers: [],
   providers: [
