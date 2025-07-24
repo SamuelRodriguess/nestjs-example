@@ -14,6 +14,10 @@ export class UserService {
     private readonly hashingService: HashingService,
   ) {}
 
+  findByEmail(email: string) {
+    return this.userRepository.findOneBy({ email });
+  }
+
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await this.hashingService.hash(
       createUserDto.password,
@@ -39,11 +43,15 @@ export class UserService {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: number, any: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  save(user: User) {
+    return this.userRepository.save(user);
   }
 }

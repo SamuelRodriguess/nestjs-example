@@ -5,24 +5,13 @@
 @userPasswordForTesting = 123456
 @userNewPasswordForTesting = 123456
 
-# USER ########################################################################
-
-### Create user
-# @name createUser
-POST  {{baseUrl}}/user/
+### Auth login
+# @name authLogin
+POST  {{baseUrl}}/auth/user/
 Content-Type: application/json
 
 {
-    "name": "{{userNameForTesting}}",
     "email": "{{userEmailForTesting}}",
     "password": "{{userPasswordForTesting}}"
 }
 
-### Get user
-# @name createUser
-GET  {{baseUrl}}/user/c82cf8e9-4162-4353-a016-1b47e317dde4
-Content-Type: application/json
-
-### Get all user
-# @name createUser
-GET  {{baseUrl}}/user
