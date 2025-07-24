@@ -62,20 +62,46 @@ export class UserService {
     return created;
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async update(id: string, userDto: UpdateUserDto) {
+    if (!userDto.name && !userDto.email) {
+      throw new BadRequestException('Dados não enviados');
+    }
+
+    const user = await this.findUserOrFail({ id });
+
+    user.name = userDto.name ?? user.name;
+
+    if (userDto.email && userDto.email !== user.email) {
+      await this.failIfEmailExists(userDto.email);
+      user.email = userDto.email;
+      user.forceLogout = true;
+    }
+
+    return this.save(user);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async updatePassword(id: string, userDto: UpdatePasswordDto) {
+    const user = await this.findUserOrFail({ id });
+
+    const isCurrentPasswordValid = await this.hashingService.compare(
+      userDto.currentPassword,
+      user.password,
+    );
+
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Senha atual inválida');
+    }
+
+    user.password = await this.hashingService.hash(userDto.newPassword);
+    user.forceLogout = true;
+
+    return this.save(user);
   }
 
-  update(id: number, any: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user = await this.findUserOrFail({ id });
+    await this.userRepository.delete({ id });
+    return user;
   }
 
   save(user: User) {

@@ -15,16 +15,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard/JwtAuthGuard';
 import { AuthenticatedRequest } from 'src/auth/types/Request';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post()
-  async create(@Body() dto: CreateUserDto) {
-    const user = await this.userService.create(dto);
-    return new UserResponseDto(user);
-  }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -33,13 +28,37 @@ export class UserController {
     return new UserResponseDto(user);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Post()
+  async create(@Body() userDto: CreateUserDto) {
+    const user = await this.userService.create(userDto);
+    return new UserResponseDto(user);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  async update(
+    @Req() req: AuthenticatedRequest,
+    @Body() userDto: UpdateUserDto,
+  ) {
+    const user = await this.userService.update(req.user.id, userDto);
+    return new UserResponseDto(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/password')
+  async updatePassword(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: UpdatePasswordDto,
+  ) {
+    const user = await this.userService.updatePassword(req.user.id, dto);
+    return new UserResponseDto(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me')
+  async remove(@Req() req: AuthenticatedRequest) {
+    const user = await this.userService.remove(req.user.id);
+    return new UserResponseDto(user);
   }
 }
+
